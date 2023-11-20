@@ -18,7 +18,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "Delyvery API",
+        Title = "Delivery API",
         Description = "Микросервис доставки, один из трёх для проекта \"Ларёк\"",
         Contact = new OpenApiContact
         {

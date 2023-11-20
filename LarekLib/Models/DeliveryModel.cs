@@ -13,7 +13,6 @@ namespace LarekLib.Models
         public bool IsDelivered { get; set; } = false;
         public bool IsCollected { get; set; } = false;
 
-        [Phone]
         public string Phone { get; set; }
     }
 }

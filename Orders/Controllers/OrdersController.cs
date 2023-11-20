@@ -147,8 +147,8 @@ namespace Orders.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                var delyveryId = await deliveryApi.GetDeliveryByOrderId(orderId);
-                await deliveryApi.DeleteDelivery(delyveryId.Id);
+                var delivery = await deliveryApi.GetDeliveryByOrderId(orderId);
+                await deliveryApi.DeleteDelivery(delivery.Id);
                 throw new Exception("Не удалось обновить объект.");
             }
 
@@ -196,7 +196,9 @@ namespace Orders.Controllers
         /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> CreateAnOrder(int productId, int count, string name,
-            bool isDelivery, string? phone, string? address, 
+            bool isDelivery, string? phone,
+            [StringLength(20, MinimumLength = 2,
+            ErrorMessage = "Ошибка заполнения, не меньше 2-х и не больше 20-ти символов.")] string? address, 
             [DataType(DataType.Date)] DateTime? dateTime)
         {
             if (_context.Orders == null)
@@ -293,6 +295,12 @@ namespace Orders.Controllers
             _context.Orders.Remove(ordersModel);
             try
             {
+                var delivery = await deliveryApi.GetDeliveryByOrderId(id);
+                if (delivery != null)
+                {
+                    await deliveryApi.DeleteDelivery(delivery.Id);
+                }
+
                 await _context.SaveChangesAsync();
                 await catalogApi.PutProduct(product);
             }

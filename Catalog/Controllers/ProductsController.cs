@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Catalog.Context;
 using LarekLib.Models;
 using System.Xml.Linq;
+using Catalog.Models;
 
 namespace Catalog.Controllers
 {
@@ -74,9 +75,20 @@ namespace Catalog.Controllers
         [HttpPut("[action]")]
         public async Task<ActionResult<Product>> PutProduct(Product product)
         {
+            if (_context.Products == null || _context.Brands == null ||
+                _context.Categories == null)
+            {
+                return NotFound("Контекст пуст.");
+            }
+
             if (!ProductExists(product.Id))
             {
                 return BadRequest("Запись по ИД не найдена.");
+            }
+
+            if (!CategoryExists(product.CategoryId) || !BrandExists(product.BrandId))
+            {
+                return NotFound("Бренд или Категория не существует.");
             }
 
             _context.Entry(product).State = EntityState.Modified;
@@ -96,25 +108,33 @@ namespace Catalog.Controllers
         /// <summary>
         /// Добавить запись в таблицу продуктов.
         /// </summary>
-        /// <param name="product">Модель продукта.</param>
+        /// <param name="shortProduct">Модель продукта.</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> PostProduct(Product product)
+        public async Task<IActionResult> PostProduct(ShortProduct shortProduct)
         {
-            if (_context.Products == null)
+            if (_context.Products == null ||
+                _context.Brands == null || 
+                _context.Categories == null)
             {
                 return NotFound("Контекст пуст.");
             }
-
-            _context.Products.Add(new Product
+            
+            if (!CategoryExists(shortProduct.CategoryId) || !BrandExists(shortProduct.BrandId))
             {
-                Name = product.Name,
-                Count = product.Count,
-                Price = product.Price,
-                BrandId = product.BrandId,
-                CategoryId = product.CategoryId
-            });
-            //_context.Products.Add(product);
+                return NotFound("Бренд или Категория не существует.");
+            }
+
+            Product product = new Product()
+            {
+                Name = shortProduct.Name,
+                Count = shortProduct.Count,
+                Price = shortProduct.Price,
+                BrandId = shortProduct.BrandId,
+                CategoryId = shortProduct.CategoryId
+            };
+            _context.Products.Add(product);
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -162,7 +182,15 @@ namespace Catalog.Controllers
 
         private bool ProductExists(int id)
         {
-            return (_context.Products?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Products?.Any(x => x.Id == id)).GetValueOrDefault();
+        }
+        private bool CategoryExists(int id)
+        {
+            return (_context.Categories?.Any(x => x.Id == id)).GetValueOrDefault();
+        }
+        private bool BrandExists(int id)
+        {
+            return (_context.Brands?.Any(x => x.Id == id)).GetValueOrDefault();
         }
     }
 }
