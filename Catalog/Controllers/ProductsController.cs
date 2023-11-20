@@ -106,15 +106,15 @@ namespace Catalog.Controllers
                 return NotFound("Контекст пуст.");
             }
 
-            //_context.Products.Add(new Product 
-            //{
-            //    Name = product.Name,
-            //    Count = product.Count,
-            //    Price = product.Price,
-            //    BrandId = product.BrandId,
-            //    CategoryId = product.CategoryId
-            //});
-            _context.Products.Add(product);
+            _context.Products.Add(new Product
+            {
+                Name = product.Name,
+                Count = product.Count,
+                Price = product.Price,
+                BrandId = product.BrandId,
+                CategoryId = product.CategoryId
+            });
+            //_context.Products.Add(product);
             try
             {
                 await _context.SaveChangesAsync();
